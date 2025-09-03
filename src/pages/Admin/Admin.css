@@ -1,0 +1,8 @@
+/* Style your admin layout here */
+.admin-layout {
+  display: flex;
+}
+.admin-main-content {
+  flex: 1;
+  padding: 40px;
+}

@@ -1,0 +1,76 @@
+.header{
+    height: 34vw;
+    margin: 30px auto;
+    background: url('/header_img.png') no-repeat;
+    background-size:contain;
+    position: relative;
+}
+.header-contents{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 1.5vw;
+    max-width: 50%;
+    bottom: 10%;
+    left: 6vw;
+    animation: fadeIn 3s;
+}
+.header-contents h2{
+    font-weight:500;
+    color: white;
+    font-size: max(4.5vw,22px);
+}
+.header-contents p{
+    color: white;
+    font-size: 1vw;
+}
+.header-contents button{
+    border: none;
+    color: #747474;
+    font-weight: 500;
+    padding: 1vw 2.3vw;
+    background: white;
+    font-size: max(1vw,13px);
+    border-radius: 50px;
+}
+@media (max-width:1050px) {
+    .header{
+        height: 38vw;
+    }
+    .header-contents{
+        max-width: 45%;
+    }
+}
+@media(max-width:750px){
+    .header-contents{
+        max-width: 55%;
+    }
+    .header-contents p{
+       display: none;
+    }
+    .header-contents button{
+        padding: 2vw 4vw;
+    }
+}
+.view-menu-btn {
+  padding: 12px 24px;
+  background-color: #ff4d00;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;              /* 🖱️ เมาส์กลายเป็น pointer */
+  transition: all 0.3s ease;    /* ทำให้ hover ลื่น */
+}
+
+.view-menu-btn:hover {
+  background-color: #ffb290;    /* เปลี่ยนสีตอน hover */
+  transform: translateY(-2px);  /* เด้งขึ้นเล็กน้อย */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.active .view-menu-btn {
+  background-color: #cc3700;    /* ถ้า active จะเข้มกว่า */
+}

@@ -1,0 +1,12 @@
+/* Admin Add page styles placeholder */
+.add {
+  max-width: 640px;
+}
+.add-img-upload img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+.cursor { cursor: pointer; }

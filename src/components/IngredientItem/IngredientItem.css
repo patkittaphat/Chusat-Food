@@ -1,0 +1,156 @@
+.ingredient-item {
+    width: 100%;
+    margin: auto;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px #00000015;
+    transition: 0.3s;
+    animation: fadeIn 1s;
+    background: white;
+}
+
+.ingredient-item:hover {
+    box-shadow: 0px 0px 20px #00000035;
+    cursor: pointer;
+}
+
+.ingredient-item-img-container {
+    position: relative;
+}
+
+.ingredient-item-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px 15px 0px 0px;
+}
+
+.ingredient-item-img-container .add {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.ingredient-item-counter {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    border-radius: 50px;
+    background-color: white;
+}
+
+.ingredient-item-counter img {
+    width: 30px;
+}
+
+.ingredient-item-counter p {
+    margin: 0;
+    color: #ff6b35;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.ingredient-item-info {
+    padding: 20px;
+}
+
+.ingredient-item-name-rating {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ingredient-item-name-rating p {
+    font-size: 20px;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+}
+
+.ingredient-item-name-rating img {
+    width: 70px;
+}
+
+.ingredient-item-desc {
+    color: #676767;
+    font-size: 12px;
+    margin: 10px 0px;
+    line-height: 1.4;
+}
+
+.ingredient-item-price-unit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.ingredient-item-price {
+    color: #ff6b35;
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.ingredient-item-unit {
+    color: #676767;
+    font-size: 14px;
+    margin: 0;
+    font-style: italic;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1050px) {
+    .ingredient-item-name-rating p {
+        font-size: 18px;
+    }
+    
+    .ingredient-item-price {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 900px) {
+    .ingredient-item-name-rating p {
+        font-size: 16px;
+    }
+    
+    .ingredient-item-price {
+        font-size: 18px;
+    }
+    
+    .ingredient-item-image {
+        height: 150px;
+    }
+}
+
+@media (max-width: 750px) {
+    .ingredient-item {
+        max-width: 300px;
+    }
+    
+    .ingredient-item-info {
+        padding: 15px;
+    }
+    
+    .ingredient-item-name-rating img {
+        width: 60px;
+    }
+}
