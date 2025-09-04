@@ -27,6 +27,12 @@ const PlaceOrder = () => {
 
     const { getTotalCartAmount, token, food_list, cartItems, url, setCartItems,currency,deliveryCharge } = useContext(StoreContext);
 
+    // ฟังก์ชันตรวจสอบว่าข้อมูลครบหรือไม่
+    const isDeliveryInfoComplete = () => {
+        const requiredFields = ['firstName', 'lastName', 'email', 'street', 'city', 'state', 'zipcode', 'country', 'phone'];
+        return requiredFields.every(field => data[field] && data[field].trim() !== '');
+    }
+
     const navigate = useNavigate();
 
     const onChangeHandler = (event) => {
@@ -42,70 +48,71 @@ const PlaceOrder = () => {
         }
     }
 
+    // ฟังก์ชันตรวจสอบความครบถ้วนของข้อมูล Delivery Information
+    const validateDeliveryInfo = () => {
+        const requiredFields = [
+            { field: 'firstName', label: 'ชื่อ' },
+            { field: 'lastName', label: 'นามสกุล' },
+            { field: 'email', label: 'อีเมล' },
+            { field: 'street', label: 'ที่อยู่' },
+            { field: 'city', label: 'เมือง' },
+            { field: 'state', label: 'รัฐ/จังหวัด' },
+            { field: 'zipcode', label: 'รหัสไปรษณีย์' },
+            { field: 'country', label: 'ประเทศ' },
+            { field: 'phone', label: 'เบอร์โทรศัพท์' }
+        ];
+
+        const missingFields = requiredFields.filter(({ field }) => !data[field] || data[field].trim() === '');
+        
+        if (missingFields.length > 0) {
+            const missingLabels = missingFields.map(({ label }) => label).join(', ');
+            toast.error(`Please fill in all required fields: ${missingLabels}`);
+            return false;
+        }
+
+        return true;
+    }
+
     const handlePromptPaySelect = () => {
+        // ตรวจสอบข้อมูล Delivery Information ก่อนเปิด Modal
+        if (!validateDeliveryInfo()) {
+            return;
+        }
         setPayment("promptpay")
         setShowPromptPayModal(true)
     }
 
     const handlePromptPayOrder = async () => {
-        if (!paymentSlip) {
-            toast.error("กรุณาแนบสลิปการโอนเงิน")
+        // ตรวจสอบข้อมูล Delivery Information อีกครั้ง
+        if (!validateDeliveryInfo()) {
+            setShowPromptPayModal(false);
             return;
         }
 
-        setShowPromptPayModal(false)
-        
-        try {
-            // ส่งคำสั่งซื้อแบบปกติก่อน
-            let orderItems = [];
-            food_list.map(((item) => {
-                if (cartItems[item._id] > 0) {
-                    let itemInfo = item;
-                    itemInfo["quantity"] = cartItems[item._id];
-                    orderItems.push(itemInfo)
-                }
-            }))
-            
-            let orderData = {
-                address: data,
-                items: orderItems,
-                amount: getTotalCartAmount() + deliveryCharge,
-                paymentMethod: "promptpay"
-            }
-            
-            // ส่งคำสั่งซื้อผ่าน endpoint COD แต่ระบุว่าเป็น PromptPay
-            let response = await axios.post(url + "/api/order/placecod", orderData, { 
-                headers: { token } 
-            });
-            
-            if (response.data.success) {
-                // TODO: ในอนาคตอาจจะส่งสลิปไปยัง API แยกต่างหาก
-                // ตอนนี้แค่เก็บไว้ใน localStorage ชั่วคราว
-                localStorage.setItem(`paymentSlip_${response.data.orderId}`, URL.createObjectURL(paymentSlip));
-                
-                navigate("/myorders")
-                toast.success("คำสั่งซื้อของคุณได้รับการยืนยันแล้ว")
-                setCartItems({});
-            }
-            else {
-                toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง")
-            }
-        } catch (error) {
-            console.error("PromptPay order error:", error);
-            toast.error("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง")
+        if (!paymentSlip) {
+            toast.error("Please upload payment slip")
+            return;
         }
+
+        // เมื่อแนบสลิปแล้ว ให้ปิด Modal และให้ผู้ใช้กดปุ่ม "ยืนยันคำสั่งซื้อ" ด้านล่าง
+        setShowPromptPayModal(false)
+        toast.success("Payment slip uploaded successfully. Please click 'Confirm Order' button below to place order")
     }
 
     const placeOrder = async (e) => {
         e.preventDefault()
         
-        // ถ้าเลือก PromptPay ให้เปิด Modal แทน
-        if (payment === "promptpay") {
+        // ถ้าเลือก PromptPay ให้เปิด Modal แทน (กรณีที่ยังไม่ได้แนบสลิป)
+        if (payment === "promptpay" && !paymentSlip) {
             setShowPromptPayModal(true)
             return;
         }
         
-        // สำหรับ COD เท่านั้น
+        // ตรวจสอบข้อมูลครบถ้วน
+        if (!validateDeliveryInfo()) {
+            return;
+        }
+        
         let orderItems = [];
         food_list.map(((item) => {
             if (cartItems[item._id] > 0) {
@@ -114,20 +121,49 @@ const PlaceOrder = () => {
                 orderItems.push(itemInfo)
             }
         }))
+        
         let orderData = {
             address: data,
             items: orderItems,
             amount: getTotalCartAmount() + deliveryCharge,
         }
         
-        let response = await axios.post(url + "/api/order/placecod", orderData, { headers: { token } });
-        if (response.data.success) {
-            navigate("/myorders")
-            toast.success(response.data.message)
-            setCartItems({});
-        }
-        else {
-            toast.error("Something Went Wrong")
+        try {
+            let response;
+            
+            if (payment === "promptpay" && paymentSlip) {
+                // สำหรับ PromptPay ที่มีสลิปแล้ว
+                orderData.paymentMethod = "promptpay";
+                response = await axios.post(url + "/api/order/placecod", orderData, { headers: { token } });
+                
+                if (response.data.success) {
+                    // เก็บสลิปใน localStorage
+                    localStorage.setItem(`paymentSlip_${response.data.orderId}`, URL.createObjectURL(paymentSlip));
+                    
+                    navigate("/myorders")
+                    toast.success("Your order has been confirmed successfully")
+                    setCartItems({});
+                    setPaymentSlip(null); // เคลียร์สลิป
+                }
+                else {
+                    toast.error("Something went wrong, please try again")
+                }
+            } else {
+                // สำหรับ COD
+                response = await axios.post(url + "/api/order/placecod", orderData, { headers: { token } });
+                
+                if (response.data.success) {
+                    navigate("/myorders")
+                    toast.success(response.data.message)
+                    setCartItems({});
+                }
+                else {
+                    toast.error("Something Went Wrong")
+                }
+            }
+        } catch (error) {
+            console.error("Order error:", error);
+            toast.error("An error occurred while sending data, please try again")
         }
     }
 
@@ -183,9 +219,26 @@ const PlaceOrder = () => {
                         <img src={payment === "promptpay" ? assets.checked : assets.un_checked} alt="" />
                         <p>PromptPay ( โอนผ่าน QR Code )</p>
                     </div>
+                    {payment === "promptpay" && paymentSlip && (
+                        <div style={{
+                            background: '#d4edda',
+                            border: '1px solid #c3e6cb',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            margin: '8px 0',
+                            color: '#155724',
+                            fontSize: '14px'
+                        }}>
+                            ✅ Payment slip uploaded successfully
+                        </div>
+                    )}
                 </div>
                 <button className='place-order-submit' type='submit'>
-                    {payment === "cod" ? "Place Order" : "ยืนยันคำสั่งซื้อ"}
+                    {payment === "cod" 
+                        ? "Place Order" 
+                        : paymentSlip 
+                        ? "Confirm Order (PromptPay)" 
+                        : "Select PromptPay Payment"}
                 </button>
             </div>
         </form>
@@ -195,7 +248,7 @@ const PlaceOrder = () => {
             <div className="promptpay-modal-overlay">
                 <div className="promptpay-modal">
                     <div className="modal-header">
-                        <h2>💳 ชำระเงินผ่าน PromptPay</h2>
+                        <h2>💳 Payment via PromptPay</h2>
                         <button 
                             className="close-modal" 
                             onClick={() => setShowPromptPayModal(false)}
@@ -207,7 +260,7 @@ const PlaceOrder = () => {
                     <div className="modal-content">
                         <div className="modal-content-flex">
                             <div className="qr-code-section">
-                                <h3>📱 สแกน QR Code เพื่อโอนเงิน</h3>
+                                <h3>📱 Scan QR Code to Transfer Money</h3>
                                 <div className="qr-wrapper">
                                     <PromptPayQRCode 
                                         phoneNumber={getPromptPayNumber()}
@@ -218,7 +271,7 @@ const PlaceOrder = () => {
                             </div>
                             
                             <div className="slip-upload-section">
-                                <h3>📎 แนบสลิปการโอนเงิน</h3>
+                                <h3>📎 Upload Payment Slip</h3>
                                 <div className="upload-area">
                                     <input 
                                         type="file" 
@@ -228,7 +281,7 @@ const PlaceOrder = () => {
                                         id="slip-upload"
                                     />
                                     <label htmlFor="slip-upload" className="upload-label">
-                                        📷 เลือกไฟล์รูปภาพ หรือ ลากไฟล์มาวางที่นี่
+                                        📷 Choose image file or drag and drop here
                                     </label>
                                 </div>
                                 {paymentSlip && (
@@ -238,13 +291,27 @@ const PlaceOrder = () => {
                                                 src={URL.createObjectURL(paymentSlip)} 
                                                 alt="Payment Slip" 
                                                 className="slip-preview-img"
-                                                title="รูปสลิปที่แนบ"
+                                                title="Uploaded payment slip"
                                             />
                                         </div>
                                     </div>
                                 )}
                             </div>
                         </div>
+                        
+                        {/* แสดงข้อความเตือนหากข้อมูลไม่ครบถ้วน */}
+                        {!isDeliveryInfoComplete() && (
+                            <div style={{
+                                background: '#fff3cd',
+                                border: '1px solid #ffeaa7',
+                                borderRadius: '6px',
+                                padding: '12px',
+                                margin: '10px 0',
+                                color: '#856404'
+                            }}>
+                                ⚠️ <strong>Please fill in all Delivery Information fields before confirming your order</strong>
+                            </div>
+                        )}
                         
                         <div className="modal-actions">
                             <button 
@@ -256,15 +323,16 @@ const PlaceOrder = () => {
                                     setPaymentSlip(null)
                                 }}
                             >
-                                ยกเลิก
+                                Cancel
                             </button>
                             <button 
                                 type="button"
                                 className="confirm-btn" 
                                 onClick={handlePromptPayOrder}
-                                disabled={!paymentSlip}
+                                disabled={!paymentSlip || !isDeliveryInfoComplete()}
+                                title={!isDeliveryInfoComplete() ? "Please fill in delivery information completely" : !paymentSlip ? "Please upload payment slip" : ""}
                             >
-                                ยืนยันการแนบสลิปและสั่งซื้อ
+                                Confirm Slip Upload
                             </button>
                         </div>
                     </div>
