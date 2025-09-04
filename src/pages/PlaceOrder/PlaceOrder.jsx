@@ -5,6 +5,8 @@ import { assets } from '../../assets/assets';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import PromptPayQRCode from '../../components/PromptPayQRCode/PromptPayQRCode';
+import { getPromptPayNumber } from '../../config/shop';
 
 const PlaceOrder = () => {
 
@@ -45,8 +47,65 @@ const PlaceOrder = () => {
         setShowPromptPayModal(true)
     }
 
+    const handlePromptPayOrder = async () => {
+        if (!paymentSlip) {
+            toast.error("กรุณาแนบสลิปการโอนเงิน")
+            return;
+        }
+
+        setShowPromptPayModal(false)
+        
+        try {
+            // ส่งคำสั่งซื้อแบบปกติก่อน
+            let orderItems = [];
+            food_list.map(((item) => {
+                if (cartItems[item._id] > 0) {
+                    let itemInfo = item;
+                    itemInfo["quantity"] = cartItems[item._id];
+                    orderItems.push(itemInfo)
+                }
+            }))
+            
+            let orderData = {
+                address: data,
+                items: orderItems,
+                amount: getTotalCartAmount() + deliveryCharge,
+                paymentMethod: "promptpay"
+            }
+            
+            // ส่งคำสั่งซื้อผ่าน endpoint COD แต่ระบุว่าเป็น PromptPay
+            let response = await axios.post(url + "/api/order/placecod", orderData, { 
+                headers: { token } 
+            });
+            
+            if (response.data.success) {
+                // TODO: ในอนาคตอาจจะส่งสลิปไปยัง API แยกต่างหาก
+                // ตอนนี้แค่เก็บไว้ใน localStorage ชั่วคราว
+                localStorage.setItem(`paymentSlip_${response.data.orderId}`, URL.createObjectURL(paymentSlip));
+                
+                navigate("/myorders")
+                toast.success("คำสั่งซื้อของคุณได้รับการยืนยันแล้ว")
+                setCartItems({});
+            }
+            else {
+                toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง")
+            }
+        } catch (error) {
+            console.error("PromptPay order error:", error);
+            toast.error("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง")
+        }
+    }
+
     const placeOrder = async (e) => {
         e.preventDefault()
+        
+        // ถ้าเลือก PromptPay ให้เปิด Modal แทน
+        if (payment === "promptpay") {
+            setShowPromptPayModal(true)
+            return;
+        }
+        
+        // สำหรับ COD เท่านั้น
         let orderItems = [];
         food_list.map(((item) => {
             if (cartItems[item._id] > 0) {
@@ -61,43 +120,15 @@ const PlaceOrder = () => {
             amount: getTotalCartAmount() + deliveryCharge,
         }
         
-        if (payment === "promptpay") {
-            if (!paymentSlip) {
-                toast.error("กรุณาแนบสลิปการโอนเงิน")
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('paymentSlip', paymentSlip);
-            formData.append('orderData', JSON.stringify(orderData));
-            
-            let response = await axios.post(url + "/api/order/promptpay", formData, { 
-                headers: { 
-                    token,
-                    'Content-Type': 'multipart/form-data'
-                } 
-            });
-            if (response.data.success) {
-                navigate("/myorders")
-                toast.success("คำสั่งซื้อของคุณได้รับการยืนยันแล้ว รอการตรวจสอบสลิป")
-                setCartItems({});
-            }
-            else {
-                toast.error("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง")
-            }
+        let response = await axios.post(url + "/api/order/placecod", orderData, { headers: { token } });
+        if (response.data.success) {
+            navigate("/myorders")
+            toast.success(response.data.message)
+            setCartItems({});
         }
-        else{
-            let response = await axios.post(url + "/api/order/placecod", orderData, { headers: { token } });
-            if (response.data.success) {
-                navigate("/myorders")
-                toast.success(response.data.message)
-                setCartItems({});
-            }
-            else {
-                toast.error("Something Went Wrong")
-            }
+        else {
+            toast.error("Something Went Wrong")
         }
-
     }
 
     useEffect(() => {
@@ -174,43 +205,45 @@ const PlaceOrder = () => {
                     </div>
                     
                     <div className="modal-content">
-                        <div className="qr-code-section">
-                            <h3> สแกน QR Code เพื่อโอนเงิน</h3>
-                            <div className="qr-wrapper">
-                                <img src={assets.promptpay_qr} alt="PromptPay QR Code" className="qr-code" />
-                            </div>
-                            <div className="amount-display">
-                                <p>💰 จำนวนเงิน: <span>{currency}{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + deliveryCharge}</span></p>
-                                <small>กรุณาโอนเงินตามจำนวนที่แสดงข้างต้น</small>
-                            </div>
-                        </div>
-                        
-                        <div className="slip-upload-section">
-                            <h3>📎 แนบสลิปการโอนเงิน</h3>
-                            <div className="upload-area">
-                                <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    onChange={handleSlipUpload}
-                                    className="slip-upload"
-                                    id="slip-upload"
-                                />
-                                <label htmlFor="slip-upload" className="upload-label">
-                                    📷 เลือกไฟล์รูปภาพ หรือ ลากไฟล์มาวางที่นี่
-                                </label>
-                            </div>
-                            {paymentSlip && (
-                                <div className="slip-preview">
-                                    <p>✅ ไฟล์ที่แนบ: {paymentSlip.name}</p>
-                                    <div className="preview-wrapper">
-                                        <img 
-                                            src={URL.createObjectURL(paymentSlip)} 
-                                            alt="Payment Slip Preview" 
-                                            className="slip-preview-img"
-                                        />
-                                    </div>
+                        <div className="modal-content-flex">
+                            <div className="qr-code-section">
+                                <h3>📱 สแกน QR Code เพื่อโอนเงิน</h3>
+                                <div className="qr-wrapper">
+                                    <PromptPayQRCode 
+                                        phoneNumber={getPromptPayNumber()}
+                                        amount={getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + deliveryCharge}
+                                        size={160}
+                                    />
                                 </div>
-                            )}
+                            </div>
+                            
+                            <div className="slip-upload-section">
+                                <h3>📎 แนบสลิปการโอนเงิน</h3>
+                                <div className="upload-area">
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleSlipUpload}
+                                        className="slip-upload"
+                                        id="slip-upload"
+                                    />
+                                    <label htmlFor="slip-upload" className="upload-label">
+                                        📷 เลือกไฟล์รูปภาพ หรือ ลากไฟล์มาวางที่นี่
+                                    </label>
+                                </div>
+                                {paymentSlip && (
+                                    <div className="slip-preview">
+                                        <div className="preview-wrapper">
+                                            <img 
+                                                src={URL.createObjectURL(paymentSlip)} 
+                                                alt="Payment Slip" 
+                                                className="slip-preview-img"
+                                                title="รูปสลิปที่แนบ"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         
                         <div className="modal-actions">
@@ -228,10 +261,10 @@ const PlaceOrder = () => {
                             <button 
                                 type="button"
                                 className="confirm-btn" 
-                                onClick={() => setShowPromptPayModal(false)}
+                                onClick={handlePromptPayOrder}
                                 disabled={!paymentSlip}
                             >
-                                ยืนยันการแนบสลิป
+                                ยืนยันการแนบสลิปและสั่งซื้อ
                             </button>
                         </div>
                     </div>

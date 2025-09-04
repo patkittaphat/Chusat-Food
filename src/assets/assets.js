@@ -60,6 +60,8 @@ import selector_icon from './selector_icon.png'
 import twitter_icon from './twitter_icon.png'
 import un_checked from './un_checked.png'
 import promptpay_qr from './promptpay_qr_default.jpg'
+import thai_qr_header from './Thai_QR_Payment_Logo-01.jpg'
+import thai_qr_center from './Thai_QR_Payment_Logo-03.jpg'
 
 export const assets = {
     logo,
@@ -83,7 +85,9 @@ export const assets = {
     parcel_icon,
     checked,
     un_checked,
-    promptpay_qr
+    promptpay_qr,
+    thai_qr_header,
+    thai_qr_center
 }
 
 export const menu_list = [
