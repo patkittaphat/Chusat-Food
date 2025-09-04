@@ -43,6 +43,8 @@ const Navbar = ({ setShowLogin }) => {
       setMenu("");
     } else if (location.pathname === '/ingredient') {
       setMenu("ingredient");
+    } else if (location.pathname === '/booking') {
+      setMenu("booking");
     }
   }, [location.pathname]);
 
@@ -53,7 +55,7 @@ const Navbar = ({ setShowLogin }) => {
         <Link to="/" onClick={() => setMenu("home")} className={`${menu === "home" ? "active" : ""}`}>Home</Link>
         <Link to="/" onClick={() => handleMenuClick("menu", "explore-menu")} className={`${menu === "menu" ? "active" : ""}`}>Menu</Link>
         <Link to="/ingredient" onClick={() => setMenu("ingredient")} className={`${menu === "ingredient" ? "active" : ""}`}>Ingredient</Link>
-        <Link to="/" onClick={() => handleMenuClick("mob-app", "reserve")} className={`${menu === "mob-app" ? "active" : ""}`}>Service</Link>
+        <Link to="/booking" onClick={() => setMenu("booking")} className={`${menu === "booking" ? "active" : ""}`}>Booking</Link>
         <Link to="/" onClick={() => handleMenuClick("contact", "footer")} className={`${menu === "contact" ? "active" : ""}`}>Contact us</Link>
       </ul>
       <div className="navbar-right">

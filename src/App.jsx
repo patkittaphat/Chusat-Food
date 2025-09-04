@@ -14,6 +14,7 @@ import Verify from "./pages/Verify/Verify";
 import BookingConfirm from "./components/BookingConfirm/BookingConfirm";
 import AdminLayout from "./components/admin/AdminLayout";
 import Ingredient from "./pages/Ingredient/Ingredient";
+import Booking from "./pages/Booking/Booking";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -33,7 +34,7 @@ const App = () => {
           <Route path="/myorders" element={<MyOrders />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/ingredient" element={<Ingredient />} />
-          <Route path="/booking" element={<AppDownload />} />
+          <Route path="/booking" element={<Booking />} />
           <Route path="/booking-confirm" element={<BookingConfirm />} />
           {/* Admin side routes with separate layout */}
           <Route path="/controller/*" element={<AdminLayout />} />

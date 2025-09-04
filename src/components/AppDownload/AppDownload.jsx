@@ -11,10 +11,7 @@ const initialTables = [
 ];
 
 const AppDownload = () => {
-  const [showTable, setShowTable] = useState(false);
-  const [animate, setAnimate] = useState(false);
   const [backAnimate, setBackAnimate] = useState(false);
-  const [returnAnimate, setReturnAnimate] = useState(false); // <-- new
   const [tables] = useState(initialTables);
   const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
@@ -24,25 +21,6 @@ const AppDownload = () => {
     columns[idx % 5].push(table);
   });
 
-  const handleClick = () => {
-    setAnimate(true);
-    setTimeout(() => setShowTable(true), 400);
-  };
-
-  const handleBack = () => {
-    setBackAnimate(true);
-    setTimeout(() => {
-      setShowTable(false);
-      setAnimate(false);
-      setBackAnimate(false);
-      setSelected(null);
-      // start return animation for buttons when main view appears
-      setReturnAnimate(true);
-      // turn off return animation after it plays
-      setTimeout(() => setReturnAnimate(false), 600);
-    }, 400);
-  };
-
   const handleConfirm = () => {
     if (selected) {
       navigate('/booking-confirm', { state: { tableId: selected } });
@@ -51,22 +29,7 @@ const AppDownload = () => {
 
   return (
     <div id="reserve" className="appdownload-center">
-      {!showTable ? (
-        <div className="appdownload-btn-row">
-          <button
-            className={`appdownload-ingredient-btn appdownload-big-btn${returnAnimate ? ' button-return-animate' : ''}`}
-          >
-            ingredient
-          </button>
-          <button
-            onClick={handleClick}
-            className={`appdownload-booking-btn appdownload-big-btn${animate ? ' button-animate' : ''}${returnAnimate ? ' button-return-animate' : ''}`}
-          >
-            Booking
-          </button>
-        </div>
-      ) : (
-        <div className={`appdownload-tablebox fade-in-table${backAnimate ? ' fade-out-table' : ''}`}>
+      <div className={`appdownload-tablebox fade-in-table${backAnimate ? ' fade-out-table' : ''}`}>
           <h2 className="appdownload-table-title">Booking</h2>
           <div className="appdownload-table-row">
             {columns.map((col, i) => (
@@ -101,17 +64,7 @@ const AppDownload = () => {
               จอง
             </button>
           </div>
-          <div className="appdownload-back-btn-row">
-            <button
-              className="appdownload-back-btn"
-              onClick={handleBack}
-              aria-label="ย้อนกลับ"
-            >
-              <span className="appdownload-back-arrow">&lt;</span>
-            </button>
-          </div>
         </div>
-      )}
     </div>
   );
 };

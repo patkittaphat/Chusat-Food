@@ -17,7 +17,7 @@ const BookingConfirm = () => {
     phone: '',
     date: '',
     time: '',
-    people: 1,
+    people: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
