@@ -85,8 +85,8 @@ const PromptPayQRCode = ({
               src={assets.thai_qr_center}
               alt="Thai QR Payment Center Logo"
               style={{
-                width: size * 0.10,
-                height: size * 0.10,
+                width: size * 0.15,
+                height: size * 0.15,
                 objectFit: 'contain',
                 borderRadius: '6px'
               }}
@@ -96,14 +96,14 @@ const PromptPayQRCode = ({
                 const fallback = document.createElement('div');
                 fallback.innerHTML = 'PP';
                 fallback.style.cssText = `
-                  width: ${size * 0.10}px;
-                  height: ${size * 0.10}px;
+                  width: ${size * 0.15}px;
+                  height: ${size * 0.15}px;
                   background: linear-gradient(135deg, #1e40af 0%, #10b981 100%);
                   color: white;
-                  font-size: ${size * 0.03}px;
+                  font-size: ${size * 0.05}px;
                   font-weight: bold;
                   text-align: center;
-                  line-height: ${size * 0.10}px;
+                  line-height: ${size * 0.15}px;
                   border-radius: 6px;
                   font-family: Arial, sans-serif;
                 `;

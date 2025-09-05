@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import PromptPayQRCode from '../../components/PromptPayQRCode/PromptPayQRCode';
 import { getPromptPayNumber } from '../../config/shop';
+import { CreditCard, QrCode, Upload, Camera } from 'lucide-react';
 
 const PlaceOrder = () => {
 
@@ -248,7 +249,9 @@ const PlaceOrder = () => {
             <div className="promptpay-modal-overlay">
                 <div className="promptpay-modal">
                     <div className="modal-header">
-                        <h2>💳 Payment via PromptPay</h2>
+                        <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <CreditCard size={20} /> Payment via PromptPay
+                        </h2>
                         <button 
                             className="close-modal" 
                             onClick={() => setShowPromptPayModal(false)}
@@ -260,7 +263,9 @@ const PlaceOrder = () => {
                     <div className="modal-content">
                         <div className="modal-content-flex">
                             <div className="qr-code-section">
-                                <h3>📱 Scan QR Code to Transfer Money</h3>
+                                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <QrCode size={18} /> Scan QR Code to Transfer Money
+                                </h3>
                                 <div className="qr-wrapper">
                                     <PromptPayQRCode 
                                         phoneNumber={getPromptPayNumber()}
@@ -271,7 +276,9 @@ const PlaceOrder = () => {
                             </div>
                             
                             <div className="slip-upload-section">
-                                <h3>📎 Upload Payment Slip</h3>
+                                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Upload size={18} /> Upload Payment Slip
+                                </h3>
                                 <div className="upload-area">
                                     <input 
                                         type="file" 
@@ -280,8 +287,8 @@ const PlaceOrder = () => {
                                         className="slip-upload"
                                         id="slip-upload"
                                     />
-                                    <label htmlFor="slip-upload" className="upload-label">
-                                        📷 Choose image file or drag and drop here
+                                    <label htmlFor="slip-upload" className="upload-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                        <Camera size={16} /> Choose image file or drag and drop here
                                     </label>
                                 </div>
                                 {paymentSlip && (

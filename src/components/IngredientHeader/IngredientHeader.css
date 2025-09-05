@@ -1,0 +1,82 @@
+.ingredient-header{
+    height: 34vw;
+    margin: 30px auto;
+    background: url('/header_img.png') no-repeat;
+    background-size:contain;
+    position: relative;
+}
+
+.ingredient-header-contents{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 1.5vw;
+    max-width: 50%;
+    bottom: 10%;
+    left: 6vw;
+    animation: fadeIn 3s;
+}
+
+.ingredient-header-contents h2{
+    font-weight:500;
+    color: white;
+    font-size: max(4.5vw,22px);
+}
+
+.ingredient-header-contents p{
+    color: white;
+    font-size: 1vw;
+}
+
+.view-ingredient-btn {
+    border: none;
+    color: #747474;
+    font-weight: 500;
+    padding: 1vw 2.3vw;
+    background: white;
+    font-size: max(1vw,13px);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-ingredient-btn:hover {
+    background-color: #ffb290;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.ingredient-menu-link {
+    text-decoration: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width:1050px) {
+    .ingredient-header{
+        height: 38vw;
+    }
+    .ingredient-header-contents{
+        max-width: 45%;
+    }
+}
+
+@media(max-width:750px){
+    .ingredient-header-contents{
+        max-width: 55%;
+    }
+    .ingredient-header-contents p{
+       display: none;
+    }
+    .view-ingredient-btn{
+        padding: 2vw 4vw;
+    }
+}
